@@ -1,107 +1,118 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowUpRight, Camera, Send, MessageSquare } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
+import { motion } from "framer-motion";
 
 const FOOTER_LINKS = [
   {
-    title: "Shop Sneakers",
+    title: "Shop Series",
     links: [
       { name: "New Arrivals", href: "/products" },
       { name: "Best Sellers", href: "/products" },
-      { name: "Special Releases", href: "/products" },
+      { name: "Tech Core Releases", href: "/products" },
     ],
   },
   {
-    title: "Information",
+    title: "Intelligence",
     links: [
-      { name: "Our Story", href: "#" },
-      { name: "Terms of Service", href: "#" },
-      { name: "Privacy Policy", href: "#" },
+      { name: "Our Manifesto", href: "#story" },
+      { name: "Terms of Access", href: "#" },
+      { name: "Privacy Protocol", href: "#" },
     ],
   },
 ];
 
-const SOCIALS = [
-  { icon: Camera, name: "Instagram", href: "#" },
-  { icon: Send, name: "Twitter", href: "#" },
-  { icon: MessageSquare, name: "Discord", href: "#" },
-];
+const SOCIALS = ["Instagram", "Twitter", "Discord", "YouTube"];
 
 export default function Footer() {
   return (
-    <footer className="relative pt-32 pb-16 px-12 md:px-24 max-w-[1400px] mx-auto bg-white border-t border-zinc-100 overflow-hidden">
-      {/* Background Ornament */}
-      <div className="absolute top-0 right-0 w-1/2 h-full bg-zinc-50/50 -skew-x-12 translate-x-1/2 -z-10" />
+    <footer className="relative bg-black text-white border-t-4 border-black overflow-hidden selection:bg-white selection:text-black">
+      {/* Blueprint Grid Background */}
+      <div className="absolute inset-0 opacity-10 pointer-events-none" 
+           style={{ backgroundImage: `linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)`, backgroundSize: '40px 40px' }} 
+      />
 
-      <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-16 md:gap-24">
-        {/* Left: Brand & Newsletter */}
-        <div className="lg:col-span-6 space-y-12">
-          <Link href="/" className="text-6xl font-black italic tracking-tighter uppercase text-black hover:opacity-60 transition-opacity">
-            StepUP
-          </Link>
-          
-          <div className="space-y-6">
-            <h4 className="text-[14px] font-black uppercase tracking-[0.3em] text-black italic">Join our Insider List</h4>
-            <div className="relative max-w-sm">
-               <input 
-                type="text" 
-                placeholder="YOUR EMAIL"
-                className="w-full bg-transparent border-b-2 border-black/10 focus:border-black outline-none pb-4 text-[14px] font-black uppercase tracking-widest placeholder:text-zinc-200 transition-all italic"
-               />
-               <button className="absolute right-0 bottom-4 hover:translate-x-2 transition-transform">
-                  <ArrowUpRight size={24} />
-               </button>
-            </div>
-          </div>
-
-          <div className="flex gap-8 pt-4">
-             {SOCIALS.map((social, i) => (
-                <Link key={i} href={social.href} className="group flex items-center gap-3">
-                   <div className="w-12 h-12 rounded-full border border-black/5 flex items-center justify-center group-hover:bg-black group-hover:text-white transition-all duration-500">
-                      <social.icon size={20} />
-                   </div>
-                   <span className="text-[10px] font-black uppercase tracking-widest opacity-0 group-hover:opacity-100 -translate-x-4 group-hover:translate-x-0 transition-all duration-500">{social.name}</span>
-                </Link>
-             ))}
-          </div>
-        </div>
-
-        {/* Right: Menu Links */}
-        <div className="lg:col-span-6 grid grid-cols-2 gap-12">
-           {FOOTER_LINKS.map((section, idx) => (
-             <div key={idx} className="space-y-8">
-                <h5 className="text-[12px] font-black uppercase tracking-[0.4em] text-zinc-300 italic">{section.title}</h5>
-                <ul className="space-y-4">
-                   {section.links.map((link, i) => (
-                     <li key={i}>
-                        <Link href={link.href} className="text-[15px] font-black uppercase tracking-tight text-black hover:text-zinc-400 transition-colors italic">
-                           {link.name}
-                        </Link>
-                     </li>
-                   ))}
-                </ul>
-             </div>
-           ))}
-        </div>
-      </div>
-
-      {/* Bottom Bar */}
-      <div className="relative z-10 mt-32 pt-12 border-t border-zinc-50 flex flex-col md:flex-row justify-between items-center gap-8">
-        <div className="flex gap-8 text-[10px] font-black uppercase tracking-widest text-zinc-400 italic">
-           <span>© {new Date().getFullYear()} stepup global</span>
-           <span>Made for the urban wanderer</span>
-        </div>
+      <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 border-b border-white/10">
         
-        <div className="flex items-center gap-4 text-[10px] font-black uppercase tracking-[0.4em] text-zinc-400 italic">
-           <div className="w-2 h-2 rounded-full bg-black" />
-           <span>Globally Sourced</span>
+        {/* Left Panel: Branding & Newsletter */}
+        <div className="lg:col-span-7 p-8 md:p-16 lg:p-24 border-b lg:border-b-0 lg:border-r border-white/10 flex flex-col justify-between h-full min-h-[400px]">
+           <div className="space-y-4">
+              <div className="flex items-center gap-4 opacity-50 mb-12">
+                 <span className="text-[10px] font-black uppercase tracking-[0.4em] italic">SYS.INIT / 2026</span>
+                 <div className="w-12 h-px bg-white" />
+              </div>
+              <h2 className="text-[60px] md:text-[120px] font-black uppercase italic tracking-tighter leading-[0.8]">
+                Step<br /><span className="text-white/20 hover:text-white transition-colors duration-1000">UP</span>
+              </h2>
+           </div>
+           
+           <div className="space-y-6 max-w-lg mt-24">
+             <h4 className="text-[10px] font-black uppercase tracking-[0.5em] text-white/40 italic">Priority Access System</h4>
+             <div className="relative group">
+                <input 
+                 type="text" 
+                 placeholder="ENTER EMAIL ID..."
+                 className="w-full bg-transparent border-b border-white/20 focus:border-white outline-none py-4 text-[12px] md:text-[14px] font-black uppercase tracking-widest placeholder:text-white/20 transition-all italic text-white"
+                />
+                <button className="absolute right-0 bottom-4 text-white hover:text-zinc-400 hover:-translate-y-1 hover:translate-x-1 transition-all">
+                   <ArrowUpRight size={24} />
+                </button>
+             </div>
+           </div>
+        </div>
+
+        {/* Right Panel: Links & Social */}
+        <div className="lg:col-span-5 p-8 md:p-16 lg:p-24 flex flex-col justify-between h-full bg-zinc-950">
+           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-16">
+              {FOOTER_LINKS.map((section, idx) => (
+                <div key={idx} className="space-y-8">
+                   <h5 className="text-[10px] font-black uppercase tracking-[0.5em] text-white/40 italic">{section.title}</h5>
+                   <ul className="space-y-4">
+                      {section.links.map((link, i) => (
+                        <li key={i}>
+                           <Link href={link.href} className="text-[12px] font-black uppercase tracking-[0.15em] text-white/80 hover:text-white hover:translate-x-2 inline-block transition-all italic">
+                              {link.name}
+                           </Link>
+                        </li>
+                      ))}
+                   </ul>
+                </div>
+              ))}
+           </div>
+           
+           <div className="pt-12 border-t border-white/10">
+              <h5 className="text-[10px] font-black uppercase tracking-[0.5em] text-white/40 italic mb-8">Network</h5>
+              <div className="flex flex-wrap gap-8">
+                 {SOCIALS.map((social, i) => (
+                    <Link key={i} href="#" className="text-[11px] font-black uppercase tracking-[0.3em] text-white hover:opacity-50 transition-opacity">
+                       {social}
+                    </Link>
+                 ))}
+              </div>
+           </div>
         </div>
       </div>
 
-      {/* Extreme Bottom Watermark */}
-      <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 opacity-[0.02] select-none pointer-events-none">
-         <span className="text-[120px] font-black tracking-tighter italic uppercase whitespace-nowrap">AUTHENTIC FOOTWEAR GROUP</span>
+      {/* Extreme Bottom Bar & Marquee */}
+      <div className="relative overflow-hidden w-full bg-black py-4 border-b-8 border-white/10">
+          <motion.div 
+            animate={{ x: [0, -2000] }}
+            transition={{ duration: 40, repeat: Infinity, ease: "linear" }}
+            className="flex gap-16 items-center whitespace-nowrap opacity-20"
+          >
+            {Array.from({ length: 8 }).map((_, i) => (
+              <span key={i} className="text-[24px] md:text-[40px] font-black uppercase tracking-tighter italic">
+                StepUP Global Franchise • Authentic Urban Fashion • 
+              </span>
+            ))}
+          </motion.div>
+          
+          {/* Copyright overlay */}
+          <div className="absolute inset-0 flex justify-center md:justify-between items-center px-8 z-10 pointer-events-none mix-blend-difference pb-2">
+             <span className="text-[8px] font-black uppercase tracking-[0.6em] text-white hidden md:block">LAT 40.7128° N — LON 74.0060° W</span>
+             <span className="text-[9px] font-black uppercase tracking-[0.4em] text-white italic">© {new Date().getFullYear()} STEPUP SERIES V1. ALL RIGHTS RESERVED.</span>
+          </div>
       </div>
     </footer>
   );

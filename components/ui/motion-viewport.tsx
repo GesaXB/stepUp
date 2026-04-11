@@ -11,9 +11,9 @@ interface MotionViewportProps {
   className?: string;
 }
 
-export default function MotionViewport({ 
-  children, 
-  delay = 0, 
+export default function MotionViewport({
+  children,
+  delay = 0,
   direction = "up",
   distance = 30,
   className = ""
