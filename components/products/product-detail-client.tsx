@@ -1,25 +1,21 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
-import { ShoppingBag, ChevronRight, Check } from "lucide-react";
+import { ShoppingBag, ChevronRight, Check, X } from "lucide-react";
 import Link from "next/link";
-import { motion, Variants } from "framer-motion";
+import { motion, Variants, AnimatePresence } from "framer-motion";
 
 const SIZES = [7, 7.5, 8, 8.5, 9, 9.5, 10, 10.5, 11, 12];
 
+import type { Product } from "@/lib/products";
+
 interface ProductDetailProps {
-  product: {
-    name: string;
-    image: string;
-    price: string;
-    sku: string;
-    status: string;
-    type: string;
-    description: string;
-  };
+  product: Product;
 }
 
 export default function ProductDetailClient({ product }: ProductDetailProps) {
+  const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false);
   // Animation configuration for staggering children elements smoothly
   const containerVariants: Variants = {
     hidden: { opacity: 0 },
@@ -116,7 +112,7 @@ export default function ProductDetailClient({ product }: ProductDetailProps) {
           <motion.div variants={itemVariants} className="space-y-4 mb-12">
              <div className="flex justify-between items-end">
                 <span className="text-[12px] font-black uppercase tracking-[0.3em] italic">Size Configuration</span>
-                <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 underline cursor-pointer hover:text-black transition-colors">Size Guide</span>
+                <button onClick={() => setIsSizeGuideOpen(true)} type="button" className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 underline hover:text-black transition-colors">Size Guide</button>
              </div>
              <div className="grid grid-cols-5 gap-3">
                 {SIZES.map(size => {
@@ -162,6 +158,93 @@ export default function ProductDetailClient({ product }: ProductDetailProps) {
              </div>
           </motion.div>
        </motion.div>
+
+       {/* Size Guide Modal (Smooth Framer Motion) */}
+       <AnimatePresence>
+          {isSizeGuideOpen && (
+             <div className="fixed inset-0 z-[100] flex items-center justify-center px-4 md:px-6">
+                {/* Backdrop overlay */}
+                <motion.div 
+                   initial={{ opacity: 0 }} 
+                   animate={{ opacity: 1 }} 
+                   exit={{ opacity: 0 }} 
+                   onClick={() => setIsSizeGuideOpen(false)}
+                   className="absolute inset-0 bg-black/20 backdrop-blur-md" 
+                />
+                
+                {/* Modal Container */}
+                <motion.div 
+                   initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                   animate={{ opacity: 1, scale: 1, y: 0 }}
+                   exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                   transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                   className="relative w-full max-w-3xl bg-white p-8 md:p-14 shadow-2xl border border-black/10 overflow-hidden"
+                >
+                   {/* Background Tech Grid */}
+                   <div className="absolute inset-0 opacity-[0.02] pointer-events-none z-0" 
+                        style={{ backgroundImage: `linear-gradient(#000 1px, transparent 1px), linear-gradient(90deg, #000 1px, transparent 1px)`, backgroundSize: '20px 20px' }} 
+                   />
+                   
+                   <button 
+                     onClick={() => setIsSizeGuideOpen(false)}
+                     className="absolute top-6 right-6 text-zinc-400 hover:text-black hover:rotate-90 transition-all duration-300 z-20"
+                     aria-label="Close Modal"
+                   >
+                      <X size={24} />
+                   </button>
+                   
+                   <div className="relative z-10 space-y-12">
+                      <div className="space-y-4 text-center md:text-left">
+                         <h2 className="text-4xl md:text-5xl font-black italic uppercase tracking-tighter text-black">Universal Protocol</h2>
+                         <p className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-400">Measurement Matrix (Men&apos;s US)</p>
+                      </div>
+
+                       {/* Minimalist Grid Table */}
+                      <div className="w-full border-t border-black/10 overflow-x-auto pb-4">
+                         <table className="w-full text-[11px] font-bold uppercase tracking-widest text-left whitespace-nowrap">
+                            <thead>
+                               <tr className="border-b border-black/10">
+                                  <th className="py-4 pl-4 font-black">US (Men)</th>
+                                  <th className="py-4 font-black">UK</th>
+                                  <th className="py-4 font-black">EU</th>
+                                  <th className="py-4 font-black">CM</th>
+                               </tr>
+                            </thead>
+                            <tbody>
+                               {[
+                                 { us: "7", uk: "6", eu: "40", cm: "25" },
+                                 { us: "7.5", uk: "6.5", eu: "40.5", cm: "25.5" },
+                                 { us: "8", uk: "7", eu: "41", cm: "26" },
+                                 { us: "8.5", uk: "7.5", eu: "42", cm: "26.5" },
+                                 { us: "9", uk: "8", eu: "42.5", cm: "27" },
+                                 { us: "9.5", uk: "8.5", eu: "43", cm: "27.5" },
+                                 { us: "10", uk: "9", eu: "44", cm: "28" },
+                                 { us: "10.5", uk: "9.5", eu: "44.5", cm: "28.5" },
+                                 { us: "11", uk: "10", eu: "45", cm: "29" },
+                                 { us: "12", uk: "11", eu: "46", cm: "30" }
+                               ].map((row, idx) => (
+                                 <tr key={idx} className="border-b border-black/5 hover:bg-zinc-50 transition-colors">
+                                    <td className="py-3 pl-4 text-black italic font-black">US {row.us}</td>
+                                    <td className="py-3 text-zinc-500">{row.uk}</td>
+                                    <td className="py-3 text-zinc-500">{row.eu}</td>
+                                    <td className="py-3 text-zinc-500">{row.cm}</td>
+                                 </tr>
+                               ))}
+                            </tbody>
+                         </table>
+                      </div>
+                      
+                      <div className="bg-zinc-50 p-6 border-l-2 border-black flex flex-col gap-2">
+                         <p className="text-[10px] font-black uppercase tracking-[0.2em] italic">Sizing Notice</p>
+                         <p className="text-[11px] font-bold text-zinc-500 leading-relaxed uppercase">
+                            Fits true to typical protocol. For individuals requiring a wider parameter, we advise escalating by 0.5 sizes for optimal functionality.
+                         </p>
+                      </div>
+                   </div>
+                </motion.div>
+             </div>
+          )}
+       </AnimatePresence>
     </div>
   );
 }

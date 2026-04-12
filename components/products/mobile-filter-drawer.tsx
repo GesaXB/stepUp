@@ -16,55 +16,73 @@ export default function MobileFilterDrawer({ isOpen, setIsOpen, filters, activeF
     <AnimatePresence>
       {isOpen && (
          <>
-            {/* Backdrop blurring effect */}
+            {/* Backdrop */}
             <motion.div 
               initial={{ opacity: 0 }} 
               animate={{ opacity: 1 }} 
               exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
               onClick={() => setIsOpen(false)}
-              className="fixed inset-0 bg-black/60 z-[90] lg:hidden backdrop-blur-sm"
+              className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[90] lg:hidden"
             />
-            {/* Mobile Drawer Slide-in Panel */}
+
+            {/* Drawer Panel */}
             <motion.div 
-              initial={{ x: "100%" }} 
-              animate={{ x: 0 }} 
-              exit={{ x: "100%" }} 
-              transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="fixed inset-y-0 right-0 w-full max-w-sm bg-white z-[100] lg:hidden p-8 flex flex-col border-l-4 border-black"
+              initial={{ y: "100%" }} 
+              animate={{ y: 0 }} 
+              exit={{ y: "100%" }} 
+              transition={{ type: "spring", damping: 30, stiffness: 300 }}
+              className="fixed inset-x-0 bottom-0 z-[100] lg:hidden bg-white rounded-t-2xl max-h-[70vh] flex flex-col"
             >
-               <div className="flex justify-between items-center border-b-2 border-black pb-6 mb-8">
-                  <span className="text-[20px] font-black uppercase tracking-tighter italic">Refine</span>
-                  <button onClick={() => setIsOpen(false)} className="p-2 hover:rotate-90 transition-transform">
-                     <X size={24} />
+               {/* Handle */}
+               <div className="flex justify-center pt-3 pb-2">
+                 <div className="w-10 h-1 bg-zinc-200 rounded-full" />
+               </div>
+
+               {/* Header */}
+               <div className="flex justify-between items-center px-6 pb-5 border-b border-black/5">
+                  <span className="text-[16px] font-black uppercase tracking-tight italic">Filter</span>
+                  <button onClick={() => setIsOpen(false)} className="p-1.5 hover:rotate-90 transition-transform duration-300">
+                     <X size={20} />
                   </button>
                </div>
                
-               <div className="flex-1 overflow-y-auto">
-                  <div className="space-y-6">
-                     <h5 className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-400">Class Type</h5>
-                     <ul className="space-y-4">
-                        {filters.map(filter => (
-                          <li key={filter}>
-                            <button 
-                              onClick={() => { setActiveFilter(filter); setIsOpen(false); }}
-                              className="flex items-center gap-4 w-full group bg-zinc-50 p-4 border border-zinc-200"
-                            >
-                              <div className={`w-4 h-4 border border-black flex items-center justify-center transition-colors ${activeFilter === filter ? 'bg-black' : 'bg-white'}`}>
-                                 {activeFilter === filter && <Check size={10} className="text-white" strokeWidth={4} />}
-                              </div>
-                              <span className={`text-[12px] font-black uppercase tracking-widest italic ${activeFilter === filter ? 'text-black' : 'text-zinc-500'}`}>
-                                {filter}
-                              </span>
-                            </button>
-                          </li>
-                        ))}
-                     </ul>
+               {/* Filter Options */}
+               <div className="flex-1 overflow-y-auto px-6 py-5">
+                  <div className="space-y-1.5">
+                     {filters.map((filter, i) => (
+                       <motion.button
+                         key={filter}
+                         initial={{ opacity: 0, y: 10 }}
+                         animate={{ opacity: 1, y: 0 }}
+                         transition={{ duration: 0.3, delay: 0.1 + i * 0.05 }}
+                         onClick={() => { setActiveFilter(filter); setIsOpen(false); }}
+                         className={`flex items-center gap-4 w-full py-4 px-5 transition-all duration-300 ${
+                           activeFilter === filter 
+                             ? 'bg-black text-white' 
+                             : 'bg-zinc-50 text-zinc-500 active:bg-zinc-100'
+                         }`}
+                       >
+                         <div className={`w-4 h-4 border flex items-center justify-center shrink-0 ${
+                           activeFilter === filter ? 'border-white/30' : 'border-zinc-300'
+                         }`}>
+                            {activeFilter === filter && <Check size={10} className="text-white" strokeWidth={3} />}
+                         </div>
+                         <span className="text-[12px] font-black uppercase tracking-widest italic">
+                           {filter}
+                         </span>
+                       </motion.button>
+                     ))}
                   </div>
                </div>
                
-               <div className="pt-8 border-t-2 border-black mt-auto">
-                  <button onClick={() => setIsOpen(false)} className="w-full bg-black text-white py-5 text-[12px] font-black uppercase tracking-[0.2em] shadow-[8px_8px_0_0_rgba(0,0,0,0.2)]">
-                     View Results
+               {/* Safe Area Padding */}
+               <div className="px-6 pb-8 pt-4 border-t border-black/5">
+                  <button 
+                    onClick={() => setIsOpen(false)} 
+                    className="w-full bg-black text-white py-4 text-[11px] font-black uppercase tracking-[0.2em] italic active:scale-[0.98] transition-transform"
+                  >
+                     Apply Filter
                   </button>
                </div>
             </motion.div>

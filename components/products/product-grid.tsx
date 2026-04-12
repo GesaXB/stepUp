@@ -2,15 +2,7 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import ProductCard from "@/components/products/product-card";
-
-interface Product {
-  name: string;
-  image: string;
-  price: string;
-  sku: string;
-  status: string;
-  type: string;
-}
+import type { Product } from "@/lib/products";
 
 interface ProductGridProps {
   filteredProducts: Product[];

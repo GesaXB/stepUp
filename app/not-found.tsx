@@ -2,15 +2,11 @@
 
 import Link from 'next/link';
 import { motion } from "framer-motion";
-import Navbar from '@/components/layout/navbar';
-import Footer from '@/components/layout/footer';
 import { ArrowLeft } from "lucide-react";
 
 export default function NotFound() {
   return (
     <div className="min-h-screen bg-white flex flex-col selection:bg-black selection:text-white">
-      <Navbar />
-      
       <main className="flex-1 relative flex flex-col items-center justify-center px-12 md:px-24 overflow-hidden pt-32">
         {/* Background Technical Ornament */}
         <div className="absolute inset-0 -z-10 opacity-[0.03] pointer-events-none" 
@@ -85,8 +81,6 @@ export default function NotFound() {
            <span className="text-[9px] font-black uppercase tracking-[0.5em]">StepUP GLOBAL NETWORK</span>
         </div>
       </main>
-
-      <Footer />
     </div>
   );
 }

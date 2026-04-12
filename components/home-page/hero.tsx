@@ -178,9 +178,22 @@ export default function Hero() {
 
            {/* Original Bio Part */}
            <div className="space-y-8 mt-4">
-              <motion.div variants={itemVariants} className="flex gap-2">
-                 {[0, 1, 2].map(i => <div key={i} className={`w-1.5 h-1.5 rounded-full ${i===0 ? 'bg-black shadow-lg shadow-black/20' : 'bg-zinc-100'}`} />)}
-              </motion.div>
+               <motion.div variants={itemVariants} className="flex gap-3 items-center">
+                  {PHRASES.map((_, i) => (
+                     <div key={i} className="relative flex items-center justify-center">
+                        <motion.div
+                           className="rounded-full"
+                           animate={{
+                              width: i === index ? 8 : 6,
+                              height: i === index ? 8 : 6,
+                              backgroundColor: i === index ? "#000" : "#e4e4e7",
+                              boxShadow: i === index ? "0 0 8px rgba(0,0,0,0.25)" : "none",
+                           }}
+                           transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                        />
+                     </div>
+                  ))}
+               </motion.div>
               <motion.p variants={itemVariants} className="text-[16px] leading-[1.6] text-zinc-500 font-bold uppercase tracking-tight italic max-w-xs transition-all hover:text-black">
                 Movement is art. Precision engineering meets high-end urban aesthetics. Designed for the bold icon.
               </motion.p>

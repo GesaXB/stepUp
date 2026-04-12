@@ -2,39 +2,63 @@
 
 import { motion } from "framer-motion";
 
-export default function ProductsHeader() {
-  return (
-    <div className="px-6 md:px-16 max-w-[1600px] mx-auto mb-16 md:mb-24 relative border-b-2 border-black pb-12">
-       <div className="absolute top-0 right-0 opacity-[0.03] pointer-events-none w-1/2 h-full" style={{ backgroundImage: `linear-gradient(#000 1px, transparent 1px), linear-gradient(90deg, #000 1px, transparent 1px)`, backgroundSize: '20px 20px' }} />
-       
-       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-12 relative z-10">
-          <div className="space-y-6">
-             <div className="flex items-center gap-4 opacity-50">
-                <span className="text-[10px] font-black uppercase tracking-[0.5em] italic">Database</span>
-                <div className="w-12 h-px bg-black" />
-                <span className="text-[10px] font-black uppercase tracking-[0.5em] italic">System 01</span>
-             </div>
-             
-             <motion.h1 
-               initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-               className="text-[50px] md:text-[140px] font-black italic uppercase tracking-tighter leading-[0.85] text-black"
-             >
-               Global<br />
-               <span className="text-zinc-200">Catalog</span>
-             </motion.h1>
-          </div>
+interface ProductsHeaderProps {
+  title?: string;
+  subtitle?: string;
+  badge?: string;
+  badgeNumber?: string;
+  resultCount?: number;
+}
 
-          <div className="flex flex-col items-start md:items-end gap-6 w-full md:w-auto">
-             <div className="flex items-center gap-3">
-                <div className="w-2 h-2 bg-black animate-pulse" />
-                <span className="text-[9px] font-black uppercase tracking-widest text-zinc-500 italic">Inventory Sync: Active</span>
-             </div>
-             <div className="w-full md:w-[300px] border border-black p-4 md:p-6 bg-zinc-50 shadow-[8px_8px_0_0_#000]">
-                <span className="text-[10px] font-black uppercase tracking-widest block mb-2 opacity-50">Auth Check</span>
-                <span className="text-[12px] font-bold uppercase tracking-widest leading-relaxed text-black italic">
-                   All models presented are physically verified against StepUP global quality parameters.
-                </span>
-             </div>
+export default function ProductsHeader({ 
+  title = "All", 
+  subtitle = "Products", 
+  badge = "Database", 
+  badgeNumber = "01",
+  resultCount 
+}: ProductsHeaderProps) {
+  return (
+    <div className="px-6 md:px-16 max-w-[1600px] mx-auto mb-12 md:mb-20 relative">
+       {/* Background Grid Accent */}
+       <div className="absolute top-0 right-0 opacity-[0.02] pointer-events-none w-1/3 h-full" 
+            style={{ backgroundImage: `linear-gradient(#000 1px, transparent 1px), linear-gradient(90deg, #000 1px, transparent 1px)`, backgroundSize: '30px 30px' }} 
+       />
+       
+       <div className="relative z-10 space-y-8 border-b border-black/10 pb-10">
+          {/* Editorial Badge */}
+          <div className="flex items-center gap-4 opacity-40">
+             <span className="text-[10px] font-black">{badgeNumber}</span>
+             <div className="w-10 h-px bg-black" />
+             <span className="text-[10px] font-black uppercase tracking-widest italic">{badge}</span>
+          </div>
+          
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8">
+            <motion.h1 
+              initial={{ opacity: 0, y: 20 }} 
+              animate={{ opacity: 1, y: 0 }} 
+              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+              className="text-[42px] md:text-[90px] lg:text-[110px] font-black italic uppercase tracking-tighter leading-[0.85] text-black"
+            >
+              {title}<br />
+              <span className="text-zinc-200">{subtitle}</span>
+            </motion.h1>
+
+            <motion.div 
+              initial={{ opacity: 0 }} 
+              animate={{ opacity: 1 }} 
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="flex flex-col items-start md:items-end gap-3"
+            >
+              <div className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 bg-black rounded-full animate-pulse" />
+                <span className="text-[8px] font-black uppercase tracking-[0.4em] text-zinc-400">Live Inventory</span>
+              </div>
+              {resultCount !== undefined && (
+                <p className="text-[12px] font-bold uppercase tracking-widest italic text-zinc-400 border-l-2 border-black pl-4 md:border-l-0 md:pl-0 md:border-r-2 md:pr-4">
+                  {resultCount} {resultCount === 1 ? 'Model' : 'Models'} Available
+                </p>
+              )}
+            </motion.div>
           </div>
        </div>
     </div>

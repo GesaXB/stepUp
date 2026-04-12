@@ -64,6 +64,7 @@ export const metadata: Metadata = {
 };
 
 import SmoothScroll from "@/components/layout/smooth-scroll";
+import ShellLayout from "@/components/layout/shell";
 
 export default function RootLayout({
   children,
@@ -75,9 +76,11 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-white">
+      <body className="min-h-full flex flex-col bg-white" suppressHydrationWarning>
         <SmoothScroll>
-          {children}
+          <ShellLayout>
+            {children}
+          </ShellLayout>
         </SmoothScroll>
       </body>
     </html>

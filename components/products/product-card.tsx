@@ -4,15 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ShoppingBag } from "lucide-react";
 import { motion } from "framer-motion";
-
-interface Product {
-  name: string;
-  image: string;
-  price: string;
-  sku: string;
-  status: string;
-  type: string;
-}
+import type { Product } from "@/lib/products";
 
 interface ProductCardProps {
   item: Product;
