@@ -21,6 +21,41 @@ export default function RegisterPage() {
     e.target.value = e.target.value.replace(/[<>"'&${}[\];\\|^%*=+]/g, '');
   };
 
+  const [formData, setFormData] = useState({ name: "", email: "", password: "" });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+
+    try {
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to register");
+      }
+
+      setSuccess(true);
+      // Redirect after success
+      setTimeout(() => {
+        window.location.href = "/";
+      }, 2000);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-white flex flex-col overflow-x-hidden">
       <main className="flex-1 flex flex-col md:flex-row">
@@ -90,15 +125,39 @@ export default function RegisterPage() {
                </h1>
             </div>
 
-            <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
+            <form className="space-y-6" onSubmit={handleSubmit}>
+               {error && (
+                 <motion.div 
+                   initial={{ opacity: 0, height: 0 }} 
+                   animate={{ opacity: 1, height: "auto" }}
+                   className="p-4 bg-red-50 border-l-2 border-red-500 text-red-600 text-[10px] font-black uppercase tracking-widest italic"
+                 >
+                   {error}
+                 </motion.div>
+               )}
+
+               {success && (
+                 <motion.div 
+                   initial={{ opacity: 0, height: 0 }} 
+                   animate={{ opacity: 1, height: "auto" }}
+                   className="p-4 bg-zinc-900 border-l-2 border-zinc-100 text-white text-[10px] font-black uppercase tracking-widest italic"
+                 >
+                   IDENTITY INITIALIZED. REDIRECTING TO CORE...
+                 </motion.div>
+               )}
+
                <div className="space-y-2 group">
                   <label className="text-[9px] font-black uppercase tracking-[0.4em] text-zinc-400 group-focus-within:text-black transition-colors italic">Full Identity</label>
                   <input 
                     type="text" 
+                    required
                     onKeyDown={blockRestrictedChars}
-                    onChange={sanitizeInput}
+                    onChange={(e) => {
+                      sanitizeInput(e);
+                      setFormData({ ...formData, name: e.target.value });
+                    }}
                     placeholder="ENTER YOUR FULL NAME..."
-                    className="w-full border-b-2 border-zinc-100 py-3 md:py-4 outline-none focus:border-black transition-all text-[13px] font-black italic placeholder:text-zinc-200 placeholder:italic uppercase tracking-widest"
+                    className="w-full border-b-2 border-zinc-100 py-3 md:py-4 outline-none focus:border-black transition-all text-[13px] font-black italic placeholder:text-zinc-200 placeholder:italic tracking-widest"
                   />
                </div>
 
@@ -106,10 +165,14 @@ export default function RegisterPage() {
                   <label className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-400 group-focus-within:text-black transition-colors italic">Email Node</label>
                   <input 
                     type="email" 
+                    required
                     onKeyDown={blockRestrictedChars}
-                    onChange={sanitizeInput}
+                    onChange={(e) => {
+                      sanitizeInput(e);
+                      setFormData({ ...formData, email: e.target.value });
+                    }}
                     placeholder="NAME@SYSTEM.COM"
-                    className="w-full border-b-2 border-zinc-100 py-3 md:py-4 outline-none focus:border-black transition-all text-[13px] font-black italic placeholder:text-zinc-200 placeholder:italic uppercase tracking-widest"
+                    className="w-full border-b-2 border-zinc-100 py-3 md:py-4 outline-none focus:border-black transition-all text-[13px] font-black italic placeholder:text-zinc-200 placeholder:italic tracking-widest"
                   />
                </div>
 
@@ -117,10 +180,14 @@ export default function RegisterPage() {
                   <label className="text-[9px] font-black uppercase tracking-[0.4em] text-zinc-400 group-focus-within:text-black transition-colors italic">Access Key</label>
                   <input 
                     type={showPassword ? "text" : "password"}
+                    required
                     onKeyDown={blockRestrictedChars}
-                    onChange={sanitizeInput}
+                    onChange={(e) => {
+                      sanitizeInput(e);
+                      setFormData({ ...formData, password: e.target.value });
+                    }}
                     placeholder="••••••••"
-                    className="w-full border-b-2 border-zinc-100 py-3 md:py-4 outline-none focus:border-black transition-all text-[13px] font-black italic placeholder:text-zinc-200 transition-all uppercase tracking-[0.5em]"
+                    className="w-full border-b-2 border-zinc-100 py-3 md:py-4 outline-none focus:border-black transition-all text-[13px] font-black italic placeholder:text-zinc-200 transition-all tracking-[0.5em]"
                   />
                   <button 
                     type="button"
@@ -132,9 +199,12 @@ export default function RegisterPage() {
                </div>
 
                <div className="pt-6 space-y-8">
-                  <button className="w-full bg-black text-white py-6 flex items-center justify-center gap-5 group overflow-hidden relative active:scale-[0.98] transition-transform shadow-xl">
-                     <span className="text-[12px] font-black uppercase tracking-[0.3em] italic relative z-10 group-hover:-translate-y-12 transition-transform duration-500">Initialize Account</span>
-                     <span className="text-[12px] font-black uppercase tracking-[0.3em] italic absolute translate-y-12 group-hover:translate-y-0 transition-transform duration-500">Creating Node...</span>
+                  <button 
+                    disabled={loading}
+                    className="w-full bg-black text-white py-6 flex items-center justify-center gap-5 group overflow-hidden relative active:scale-[0.98] transition-transform shadow-xl disabled:opacity-50"
+                  >
+                     <span className={`text-[12px] font-black uppercase tracking-[0.3em] italic relative z-10 ${loading ? '-translate-y-12' : ''} group-hover:-translate-y-12 transition-transform duration-500`}>Initialize Account</span>
+                     <span className={`text-[12px] font-black uppercase tracking-[0.3em] italic absolute ${loading ? 'translate-y-0' : 'translate-y-12'} group-hover:translate-y-0 transition-transform duration-500`}>Creating Node...</span>
                      <ArrowRight size={16} className="group-hover:translate-x-2 transition-transform duration-500" />
                   </button>
 
