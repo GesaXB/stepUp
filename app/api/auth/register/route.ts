@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { hashPassword, createSession } from "@/lib/auth";
+import { hashPassword } from "@/lib/auth";
 import { z } from "zod";
+import { createVerificationToken } from "@/lib/tokens";
+import { sendOTPEmail } from "@/lib/email";
 
 const registerSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -36,22 +38,33 @@ export async function POST(req: Request) {
       );
     }
 
-    // 3. Hash password and create user
+    // 3. Hash password and create user (Unverified state)
     const hashedPassword = await hashPassword(password);
     const user = await prisma.user.create({
       data: {
         name,
         email: email.toLowerCase(),
         password: hashedPassword,
-        role: "USER", // Default role
+        role: "USER",
+        emailVerified: null, // Ensure it's null until OTP is verified
       },
     });
 
-    // 4. Initialize session
-    await createSession(user.id);
+    // 4. Generate & Send OTP
+    const verificationToken = await createVerificationToken(user.email);
+    const { success: emailSent } = await sendOTPEmail(user.email, verificationToken.token);
+
+    if (!emailSent) {
+      // Cleanup user if email fails? For now just log it.
+      console.error("Failed to send verification email to:", user.email);
+    }
 
     return NextResponse.json(
-      { message: "Identity created successfully. Welcome to the Vault.", userId: user.id },
+      { 
+        message: "Identity recorded. Verification code transmitted to your terminal.", 
+        userId: user.id,
+        email: user.email 
+      },
       { status: 201 }
     );
   } catch (error) {
