@@ -10,6 +10,8 @@ import {
 import { createBrowserSupabase } from "@/lib/supabase/client";
 import { clearLocalCart } from "@/lib/cart";
 
+export const dynamic = "force-dynamic";
+
 export default function ProfilePage() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -22,7 +24,9 @@ export default function ProfilePage() {
   const [updating, setUpdating] = useState(false);
   const [emailUpdateSent, setEmailUpdateSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const supabase = createBrowserSupabase();
+  
+  // Initialize Supabase only when needed to prevent build-time errors
+  const supabase = typeof window !== "undefined" ? createBrowserSupabase() : null;
 
   useEffect(() => {
     const fetchUser = async () => {

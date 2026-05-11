@@ -6,6 +6,8 @@ import { motion } from "framer-motion";
 import { ArrowRight, Lock, Eye, EyeOff } from "lucide-react";
 import { createBrowserSupabase } from "@/lib/supabase/client";
 
+export const dynamic = "force-dynamic";
+
 export default function ResetPasswordPage() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -15,10 +17,11 @@ export default function ResetPasswordPage() {
   const [success, setSuccess] = useState(false);
   
   const router = useRouter();
-  const supabase = createBrowserSupabase();
+  const supabase = typeof window !== "undefined" ? createBrowserSupabase() : null;
 
   // Redirect if not authorized (should have a token in URL hash)
   useEffect(() => {
+    if (!supabase) return;
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       // Supabase automatically logs in the user temporarily when they click the reset link
@@ -31,6 +34,7 @@ export default function ResetPasswordPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!supabase) return;
     
     if (password !== confirmPassword) {
       setError("Passwords do not match.");
