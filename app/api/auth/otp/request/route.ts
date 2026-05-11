@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { createVerificationToken } from "@/lib/tokens";
-import { sendOTPEmail } from "@/lib/email";
+import { createServerSupabase } from "@/lib/supabase/server";
 
 const requestSchema = z.object({
   email: z.string().email("Invalid email format"),
@@ -20,31 +19,42 @@ export async function POST(req: Request) {
     }
 
     const { email } = result.data;
+    const supabase = await createServerSupabase();
 
-    // 1. Create token in DB
-    const verificationToken = await createVerificationToken(email.toLowerCase());
+    // Resend signup confirmation link via Supabase
+    const { error } = await supabase.auth.resend({
+      type: 'signup',
+      email: email.toLowerCase(),
+      options: {
+        emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/auth/callback`,
+      }
+    });
 
-    // 2. Send Email via Resend
-    const { success, error } = await sendOTPEmail(
-      verificationToken.email,
-      verificationToken.token
-    );
+    if (error) {
+      console.error("[SUPABASE_RESEND_ERROR]:", error);
+      
+      // Handle Rate Limit (429)
+      if (error.status === 429) {
+        return NextResponse.json(
+          { error: "Slow down! You can only request a new link once every 60 seconds." },
+          { status: 429 }
+        );
+      }
 
-    if (!success) {
       return NextResponse.json(
-        { error: "Protocol Failure: Communication link could not be established." },
+        { error: error.message || "Failed to resend verification email." },
         { status: 500 }
       );
     }
 
     return NextResponse.json(
-      { message: "Access code transmitted to the designated terminal." },
+      { message: "Verification code sent to your email via Supabase." },
       { status: 200 }
     );
   } catch (error) {
     console.error("OTP Request Error:", error);
     return NextResponse.json(
-      { error: "System Breach: Internal processing failure." },
+      { error: "An unexpected error occurred. Please try again." },
       { status: 500 }
     );
   }

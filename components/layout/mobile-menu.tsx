@@ -3,14 +3,27 @@
 import Link from "next/link";
 import { X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { clearLocalCart } from "@/lib/cart";
 
 interface MobileMenuProps {
   isOpen: boolean;
   onClose: () => void;
   links: { name: string; href: string }[];
+  user: any;
+  loading: boolean;
 }
 
-export function MobileMenu({ isOpen, onClose, links }: MobileMenuProps) {
+export function MobileMenu({ isOpen, onClose, links, user, loading }: MobileMenuProps) {
+  const handleLogout = async () => {
+    try {
+      clearLocalCart();
+      await fetch("/api/auth/logout", { method: "POST" });
+      window.location.href = "/";
+    } catch (err) {
+      console.error("Logout failed:", err);
+    }
+  };
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -45,6 +58,38 @@ export function MobileMenu({ isOpen, onClose, links }: MobileMenuProps) {
                  </Link>
                </motion.div>
              ))}
+
+             <motion.div 
+               initial={{ opacity: 0, x: -20 }}
+               animate={{ opacity: 1, x: 0 }}
+               transition={{ delay: 0.2 + (links.length * 0.1), duration: 0.5 }}
+             >
+                {user ? (
+                  <div className="flex flex-col gap-6">
+                    <Link 
+                      href="/profile" 
+                      onClick={onClose}
+                      className="text-[45px] font-black uppercase italic tracking-tighter text-zinc-400 hover:text-white transition-all"
+                    >
+                      Profile
+                    </Link>
+                    <button 
+                      onClick={handleLogout}
+                      className="text-[20px] font-black uppercase italic tracking-[0.2em] text-red-500 text-left hover:pl-4 transition-all"
+                    >
+                      Log Out
+                    </button>
+                  </div>
+                ) : (
+                  <Link 
+                    href="/login" 
+                    onClick={onClose}
+                    className="text-[45px] font-black uppercase italic tracking-tighter text-zinc-400 hover:text-white transition-all"
+                  >
+                    Sign In
+                  </Link>
+                )}
+             </motion.div>
           </div>
 
           <motion.div 

@@ -37,8 +37,8 @@ export async function createVerificationToken(email: string) {
  * Verifies if a token is valid for a given email.
  */
 export async function verifyOTPToken(email: string, token: string) {
-  const verificationToken = await prisma.verificationToken.findUnique({
-    where: { token },
+  const verificationToken = await prisma.verificationToken.findFirst({
+    where: { email, token },
   });
 
   if (!verificationToken || verificationToken.email !== email) {

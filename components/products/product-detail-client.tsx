@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { ShoppingBag, ChevronRight, Check, X } from "lucide-react";
+import { ShoppingBag, ChevronRight, Check, X, Loader2, Heart } from "lucide-react";
 import Link from "next/link";
 import { motion, Variants, AnimatePresence } from "framer-motion";
+import { addToLocalCart } from "@/lib/cart";
 
 const SIZES = [7, 7.5, 8, 8.5, 9, 9.5, 10, 10.5, 11, 12];
 
@@ -16,7 +17,48 @@ interface ProductDetailProps {
 
 export default function ProductDetailClient({ product }: ProductDetailProps) {
   const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false);
-  // Animation configuration for staggering children elements smoothly
+  const [selectedSize, setSelectedSize] = useState<number | null>(null);
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
+  const [isAddingToWishlist, setIsAddingToWishlist] = useState(false);
+  const [isAdded, setIsAdded] = useState(false);
+
+  const handleAddToCart = (e: React.MouseEvent) => {
+    if (!selectedSize) return;
+    setIsAddingToCart(true);
+    // Guest can always add to cart locally
+    addToLocalCart(product.sku, selectedSize.toString(), 1);
+    
+    // Dispatch flying animation
+    window.dispatchEvent(new CustomEvent("cart-fly", { 
+      detail: { x: e.clientX, y: e.clientY, image: product.image } 
+    }));
+
+    setTimeout(() => {
+      setIsAddingToCart(false);
+      setIsAdded(true);
+      window.dispatchEvent(new Event('cart-update'));
+      setTimeout(() => setIsAdded(false), 2000);
+    }, 500);
+  };
+
+  const handleAddToWishlist = async () => {
+    setIsAddingToWishlist(true);
+    try {
+      const res = await fetch("/api/wishlist", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sku: product.sku })
+      });
+      if (res.status === 401) {
+        // Only redirect to login if they explicitly try to heart while logged out
+        window.location.href = "/login?redirect=" + window.location.pathname;
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsAddingToWishlist(false);
+    }
+  };
   const containerVariants: Variants = {
     hidden: { opacity: 0 },
     show: {
@@ -116,12 +158,13 @@ export default function ProductDetailClient({ product }: ProductDetailProps) {
              </div>
              <div className="grid grid-cols-5 gap-3">
                 {SIZES.map(size => {
-                   const isSelected = size === 9; // Mock selected state
+                   const isSelected = size === selectedSize;
                    const isOut = size === 11 || size === 7.5;
                    return (
                       <button 
                         key={size}
                         disabled={isOut}
+                        onClick={() => setSelectedSize(size)}
                         className={`py-4 flex items-center justify-center text-[13px] font-bold transition-all border ${isSelected ? 'bg-black text-white border-black' : isOut ? 'bg-zinc-50 text-zinc-300 border-zinc-200 cursor-not-allowed line-through' : 'bg-white text-black border-zinc-200 hover:border-black'}`}
                       >
                          US {size}
@@ -132,15 +175,32 @@ export default function ProductDetailClient({ product }: ProductDetailProps) {
           </motion.div>
 
           {/* Action */}
-          <motion.button 
-            variants={itemVariants}
-            disabled={product.status === 'Sold Out'}
-            whileTap={{ scale: 0.98 }}
-            className="w-full bg-black text-white py-6 text-[14px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-6 hover:bg-zinc-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed mb-16"
-          >
-            {product.status === 'Sold Out' ? 'Currently Unavailable' : 'Add to Delivery Cart'}
-            <ShoppingBag size={18} />
-          </motion.button>
+          <div className="flex gap-4 mb-16">
+            <motion.button 
+              variants={itemVariants}
+              disabled={product.status === 'Sold Out' || !selectedSize || isAddingToCart}
+              whileTap={{ scale: (!selectedSize || product.status === 'Sold Out') ? 1 : 0.98 }}
+              onClick={(e) => handleAddToCart(e)}
+              className={`flex-1 py-6 text-[14px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-6 transition-all disabled:opacity-50 disabled:cursor-not-allowed ${isAdded ? 'bg-zinc-100 text-black border border-black/10' : 'bg-black text-white hover:bg-zinc-800'}`}
+            >
+              {isAddingToCart ? <Loader2 className="animate-spin" size={18} /> : (
+                <>
+                  {product.status === 'Sold Out' ? 'Unavailable' : !selectedSize ? 'Select Size' : isAdded ? 'Added to Cart' : 'Add to Cart'}
+                  {isAdded ? <Check size={18} className="text-green-600" /> : <ShoppingBag size={18} />}
+                </>
+              )}
+            </motion.button>
+
+            <motion.button
+              variants={itemVariants}
+              disabled={isAddingToWishlist}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleAddToWishlist}
+              className="w-16 md:w-20 border border-zinc-200 flex items-center justify-center text-black hover:border-black transition-colors"
+            >
+              {isAddingToWishlist ? <Loader2 className="animate-spin" size={24} /> : <Heart size={24} />}
+            </motion.button>
+          </div>
 
           {/* Technical Specifications Accordions */}
           <motion.div variants={itemVariants} className="border-t border-black/10">

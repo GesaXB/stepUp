@@ -17,13 +17,18 @@ export const sendOTPEmail = async (email: string, otp: string) => {
 
     if (error) {
       console.error("[RESEND_ERROR]:", error);
+      // In development, we don't want to block the user if Resend fails 
+      // because of sandbox restrictions (403).
+      console.log(`\n\n[DEVELOPMENT_MODE] >>> YOUR ACCESS CODE IS: ${otp} <<<\n\n`);
       return { success: false, error };
     }
 
     console.log("[EMAIL_SYSTEM] Success:", data);
     return { success: true, data };
-  } catch (error) {
-    console.error("[EMAIL_CRITICAL_FAILURE]:", error);
-    return { success: false, error };
+  } catch (err) {
+    console.error("[EMAIL_CRITICAL_FAILURE]:", err);
+    // Fallback log for development
+    console.log(`\n\n[DEVELOPMENT_MODE] >>> YOUR ACCESS CODE IS: ${otp} <<<\n\n`);
+    return { success: false, error: err };
   }
 };

@@ -1,24 +1,11 @@
 import { NextResponse } from "next/server";
-import { getSession } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { getCurrentUser } from "@/lib/auth";
 
 export async function GET() {
-  const session = await getSession();
-  
-  if (!session) {
-    return NextResponse.json({ user: null });
+  try {
+    const user = await getCurrentUser();
+    return NextResponse.json({ user });
+  } catch (error) {
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
-
-  const user = await prisma.user.findUnique({
-    where: { id: session.userId },
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      role: true,
-      image: true,
-    },
-  });
-
-  return NextResponse.json({ user });
 }

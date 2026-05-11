@@ -1,6 +1,7 @@
 import { SignJWT, jwtVerify } from "jose";
 import bcrypt from "bcryptjs";
 import { cookies } from "next/headers";
+import { prisma } from "./prisma";
 
 const SECRET = new TextEncoder().encode(
   process.env.JWT_SECRET || "fallback_secret_for_dev_mode"
@@ -14,8 +15,8 @@ export async function verifyPassword(password: string, hash: string) {
   return await bcrypt.compare(password, hash);
 }
 
-export async function createSession(userId: string) {
-  const token = await new SignJWT({ userId })
+export async function createSession(userId: string, role: string = "USER") {
+  const token = await new SignJWT({ userId, role })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime("7d")
@@ -40,7 +41,28 @@ export async function getSession() {
 
   try {
     const { payload } = await jwtVerify(token, SECRET);
-    return payload as { userId: string };
+    return payload as { userId: string; role: string };
+  } catch (error) {
+    return null;
+  }
+}
+
+export async function getCurrentUser() {
+  const session = await getSession();
+  if (!session) return null;
+
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: session.userId },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        image: true,
+        role: true,
+      },
+    });
+    return user;
   } catch (error) {
     return null;
   }

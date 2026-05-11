@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { verifyOTPToken } from "@/lib/tokens";
+import { createServerSupabase } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
 import { createSession } from "@/lib/auth";
 
 const verifySchema = z.object({
   email: z.string().email(),
-  token: z.string().length(6, "Token must be exactly 6 digits"),
+  token: z.string().min(6, "Token too short").max(8, "Token too long"),
 });
 
 export async function POST(req: Request) {
@@ -22,33 +22,44 @@ export async function POST(req: Request) {
     }
 
     const { email, token } = result.data;
+    const supabase = await createServerSupabase();
 
-    const verification = await verifyOTPToken(email.toLowerCase(), token);
+    // Verify OTP via Supabase
+    const { data, error } = await supabase.auth.verifyOtp({
+      email: email.toLowerCase(),
+      token: token,
+      type: 'email'
+    });
 
-    if (!verification.success) {
+    if (error || !data.user) {
       return NextResponse.json(
-        { error: `Identity Rejection: ${verification.message}` },
+        { error: error?.message || "Invalid or expired verification code." },
         { status: 401 }
       );
     }
 
-    // 1. Activate User
+    // 1. Activate User in Prisma (mark as verified)
     const user = await prisma.user.update({
       where: { email: email.toLowerCase() },
-      data: { emailVerified: new Date() },
+      data: { 
+        emailVerified: new Date(),
+        // Sync name/image if available from Supabase metadata
+        name: data.user.user_metadata.full_name || undefined,
+        image: data.user.user_metadata.avatar_url || undefined,
+      },
     });
 
-    // 2. Create Session
+    // 2. Create Custom JWT Session for our app
     await createSession(user.id);
 
     return NextResponse.json(
-      { message: "Identity verified. Protocol access granted. Welcome to the Vault." },
+      { message: "Verification successful! Welcome to StepUP." },
       { status: 200 }
     );
   } catch (error) {
     console.error("OTP Verification Error:", error);
     return NextResponse.json(
-      { error: "System Breach: Verification sequence interrupted." },
+      { error: "An unexpected error occurred. Please try again." },
       { status: 500 }
     );
   }

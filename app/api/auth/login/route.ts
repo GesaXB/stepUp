@@ -16,7 +16,7 @@ export async function POST(req: Request) {
     const result = loginSchema.safeParse(body);
     if (!result.success) {
       return NextResponse.json(
-        { error: "Protocol Error: Invalid credentials format." },
+        { error: "Invalid email or password format." },
         { status: 400 }
       );
     }
@@ -30,7 +30,7 @@ export async function POST(req: Request) {
 
     if (!user || !user.password) {
       return NextResponse.json(
-        { error: "Authentication Failed: Access key or Node ID mismatch." },
+        { error: "Incorrect email or password. Please try again." },
         { status: 401 }
       );
     }
@@ -39,22 +39,22 @@ export async function POST(req: Request) {
     const isPasswordValid = await verifyPassword(password, user.password);
     if (!isPasswordValid) {
       return NextResponse.json(
-        { error: "Authentication Failed: Access key or Node ID mismatch." },
+        { error: "Incorrect email or password. Please try again." },
         { status: 401 }
       );
     }
 
     // 4. Create Session
-    await createSession(user.id);
+    await createSession(user.id, user.role);
 
     return NextResponse.json(
-      { message: "Access granted. Welcome back.", role: user.role },
+      { message: "Login successful! Welcome back.", role: user.role },
       { status: 200 }
     );
   } catch (error) {
     console.error("Login fatal error:", error);
     return NextResponse.json(
-      { error: "System Error: Failed to authorize access." },
+      { error: "System error. Please try again later." },
       { status: 500 }
     );
   }

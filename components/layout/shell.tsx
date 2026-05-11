@@ -8,13 +8,14 @@ const AUTH_ROUTES = ["/login", "/register"];
 
 export default function ShellLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const isAdminPage = pathname.startsWith("/admin");
   const isAuthPage = AUTH_ROUTES.includes(pathname);
 
   return (
     <>
-      <Navbar />
+      {!isAdminPage && <Navbar />}
       {children}
-      {!isAuthPage && <Footer />}
+      {!isAuthPage && !isAdminPage && <Footer />}
     </>
   );
 }

@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import { Search, Heart, ShoppingBag, User, Menu } from "lucide-react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { NavTicker } from "./nav-ticker";
 import { SearchOverlay } from "./search-overlay";
 import { MobileMenu } from "./mobile-menu";
+import { getLocalCart } from "@/lib/cart";
 
 const NAV_LEFT = [
   { name: "New Drops", href: "/new-drops" },
@@ -16,18 +17,58 @@ const NAV_LEFT = [
 ];
 
 const NAV_RIGHT = [
-  { name: "Journal", href: "#story" },
-  { name: "Stores", href: "#" },
+  { name: "Journal", href: "/journal" },
+  { name: "Stories", href: "/stories" },
 ];
 
 export default function Navbar() {
   const pathname = usePathname();
-  const isAuthPage = pathname === "/login" || pathname === "/register";
+  const isAuthPage = pathname === "/login" || pathname === "/register" || pathname === "/forgot-password" || pathname === "/reset-password" || pathname === "/register/verify";
   
   const { scrollY } = useScroll();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [cartCount, setCartCount] = useState(0);
+
+  const updateCartCount = () => {
+    const cart = getLocalCart();
+    const count = cart.reduce((acc, item) => acc + item.quantity, 0);
+    setCartCount(count);
+  };
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const res = await fetch("/api/auth/me", { cache: "no-store", headers: { 'Pragma': 'no-cache' } });
+        const contentType = res.headers.get("content-type") || "";
+        if (!res.ok || !contentType.includes("application/json")) {
+          setUser(null);
+          return;
+        }
+
+        const data = await res.json();
+        setUser(data.user ?? null);
+      } catch (err) {
+        console.error("Failed to fetch session:", err);
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchUser();
+    updateCartCount();
+    window.addEventListener('profile-update', fetchUser);
+    window.addEventListener('cart-update', updateCartCount);
+    return () => {
+      window.removeEventListener('profile-update', fetchUser);
+      window.removeEventListener('cart-update', updateCartCount);
+    };
+  }, []);
 
   const navHeight = useTransform(scrollY, [0, 50], ["85px", "70px"]);
   const logoScale = useTransform(scrollY, [0, 50], [1, 0.85]);
@@ -65,7 +106,7 @@ export default function Navbar() {
             ))}
           </div>
 
-          {/* Logo */}
+          {/* Logo (RESTORED STYLE) */}
           <motion.div style={{ scale: logoScale }} className="flex justify-center w-1/3">
             <Link href="/" className="text-3xl md:text-5xl font-black tracking-tighter text-black italic uppercase transition-all duration-700 hover:tracking-normal active:scale-95 select-none no-underline">
               StepUP
@@ -88,23 +129,50 @@ export default function Navbar() {
                 <Search size={18} strokeWidth={2.5} />
               </button>
               
-              <Link href="#" className="hidden sm:block hover:scale-110 transition-transform">
+              <Link href="/wishlist" className="hidden sm:block hover:scale-110 transition-transform">
                 <Heart size={18} strokeWidth={2.5} />
               </Link>
 
               <Link href="/cart" className="relative hover:scale-110 transition-transform">
-                <ShoppingBag size={18} strokeWidth={2.5} />
-                <span className="absolute -top-2 -right-2 w-4 h-4 bg-black text-white text-[7px] font-bold flex items-center justify-center rounded-full italic ring-2 ring-white">2</span>
+                <motion.div
+                  id="navbar-cart-icon"
+                  key={cartCount}
+                  animate={cartCount > 0 ? { 
+                    scale: [1, 1.25, 1],
+                    rotate: [0, -10, 10, 0]
+                  } : {}}
+                  transition={{ duration: 0.4, ease: "backOut" }}
+                >
+                  <ShoppingBag size={18} strokeWidth={2.5} />
+                  {cartCount > 0 && (
+                    <motion.span 
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      className="absolute -top-2 -right-2 w-4 h-4 bg-black text-white text-[7px] font-bold flex items-center justify-center rounded-full italic ring-2 ring-white"
+                    >
+                      {cartCount}
+                    </motion.span>
+                  )}
+                </motion.div>
               </Link>
 
-              <Link href="/login" className="hover:scale-110 transition-transform">
-                <User size={18} strokeWidth={2.5} />
+              <Link href={user ? "/profile" : "/login"} className="relative hover:scale-110 transition-transform">
+                {user?.image ? (
+                  <div className="w-[22px] h-[22px] rounded-full overflow-hidden border border-black/10">
+                    <img src={user.image} alt={user.name || "User"} className="w-full h-full object-cover" />
+                  </div>
+                ) : (
+                  <User size={18} strokeWidth={2.5} className={loading ? "opacity-40 animate-pulse" : ""} />
+                )}
+                {user && (
+                  <div className="absolute -top-1 -right-1 w-2 h-2 bg-black rounded-full" />
+                )}
               </Link>
             </div>
           </div>
         </div>
 
-        {/* Modern Clean Scrolled Border */}
+        {/* Restore Original Bottom Border Style */}
         <div 
           className={`absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-black/10 to-transparent transition-opacity duration-1000 ${
             isScrolled || isAuthPage ? "opacity-100" : "opacity-0"
@@ -118,6 +186,8 @@ export default function Navbar() {
         isOpen={isMobileMenuOpen} 
         onClose={() => setIsMobileMenuOpen(false)} 
         links={[...NAV_LEFT, ...NAV_RIGHT]} 
+        user={user}
+        loading={loading}
       />
     </>
   );

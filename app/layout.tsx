@@ -65,6 +65,7 @@ export const metadata: Metadata = {
 
 import SmoothScroll from "@/components/layout/smooth-scroll";
 import ShellLayout from "@/components/layout/shell";
+import { FlyingCart } from "@/components/ui/flying-cart";
 
 export default function RootLayout({
   children,
@@ -80,6 +81,7 @@ export default function RootLayout({
         <SmoothScroll>
           <ShellLayout>
             {children}
+            <FlyingCart />
           </ShellLayout>
         </SmoothScroll>
       </body>
