@@ -17,7 +17,8 @@ interface ProductDetailProps {
 
 export default function ProductDetailClient({ product }: ProductDetailProps) {
   const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false);
-  const [selectedSize, setSelectedSize] = useState<number | null>(null);
+  const [activeImage, setActiveImage] = useState(product.images?.[0] || product.image);
+  const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [isAddingToWishlist, setIsAddingToWishlist] = useState(false);
   const [isAdded, setIsAdded] = useState(false);
@@ -26,11 +27,11 @@ export default function ProductDetailClient({ product }: ProductDetailProps) {
     if (!selectedSize) return;
     setIsAddingToCart(true);
     // Guest can always add to cart locally
-    addToLocalCart(product.sku, selectedSize.toString(), 1);
+    addToLocalCart(product.sku, selectedSize, 1);
     
     // Dispatch flying animation
     window.dispatchEvent(new CustomEvent("cart-fly", { 
-      detail: { x: e.clientX, y: e.clientY, image: product.image } 
+      detail: { x: e.clientX, y: e.clientY, image: activeImage } 
     }));
 
     setTimeout(() => {
@@ -94,13 +95,14 @@ export default function ProductDetailClient({ product }: ProductDetailProps) {
              <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: `linear-gradient(#000 1px, transparent 1px), linear-gradient(90deg, #000 1px, transparent 1px)`, backgroundSize: '20px 20px' }} />
              
              <motion.div 
+               key={activeImage}
                initial={{ scale: 0.9, opacity: 0 }} 
                animate={{ scale: 1, opacity: 1 }} 
-               transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
+               transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
                className="relative w-full h-full"
              >
                 <Image 
-                  src={product.image} 
+                  src={activeImage} 
                   alt={product.name} 
                   fill 
                   className="object-contain p-12 mix-blend-multiply" 
@@ -114,16 +116,17 @@ export default function ProductDetailClient({ product }: ProductDetailProps) {
              </div>
           </div>
           
-          <div className="grid grid-cols-3 gap-4 mt-2">
-             {[1, 2, 3].map((i, idx) => (
+          {/* Thumbnails */}
+          <div className="grid grid-cols-4 gap-4 mt-2">
+             {(product.images || [product.image]).map((img: string, idx: number) => (
                 <motion.div 
-                  key={i}
+                  key={idx}
                   initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 0.6, y: 0 }}
-                  transition={{ delay: 0.4 + (idx * 0.1), duration: 0.5 }}
-                  className="aspect-[4/3] bg-zinc-50 border border-zinc-100 rounded-lg p-6 relative flex items-center justify-center hover:opacity-100 cursor-pointer transition-opacity"
+                  animate={{ opacity: activeImage === img ? 1 : 0.6, y: 0 }}
+                  onClick={() => setActiveImage(img)}
+                  className={`aspect-4/3 bg-zinc-50 border rounded-lg p-6 relative flex items-center justify-center cursor-pointer transition-all ${activeImage === img ? 'border-black' : 'border-zinc-100 hover:opacity-100'}`}
                 >
-                   <Image src={product.image} alt="Thumbnail" fill className="object-contain mix-blend-multiply p-4 max-w-[80%] mx-auto" />
+                   <Image src={img} alt="Thumbnail" fill className="object-contain mix-blend-multiply p-4 max-w-[80%] mx-auto" />
                 </motion.div>
              ))}
           </div>
@@ -156,21 +159,25 @@ export default function ProductDetailClient({ product }: ProductDetailProps) {
                 <span className="text-[12px] font-black uppercase tracking-[0.3em] italic">Size Configuration</span>
                 <button onClick={() => setIsSizeGuideOpen(true)} type="button" className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 underline hover:text-black transition-colors">Size Guide</button>
              </div>
-             <div className="grid grid-cols-5 gap-3">
-                {SIZES.map(size => {
-                   const isSelected = size === selectedSize;
-                   const isOut = size === 11 || size === 7.5;
+             <div className="grid grid-cols-4 md:grid-cols-5 gap-3">
+                {product.variants?.map((variant: any) => {
+                   const isSelected = variant.size === selectedSize;
+                   const isOut = variant.stock === 0;
                    return (
                       <button 
-                        key={size}
+                        key={variant.id}
                         disabled={isOut}
-                        onClick={() => setSelectedSize(size)}
-                        className={`py-4 flex items-center justify-center text-[13px] font-bold transition-all border ${isSelected ? 'bg-black text-white border-black' : isOut ? 'bg-zinc-50 text-zinc-300 border-zinc-200 cursor-not-allowed line-through' : 'bg-white text-black border-zinc-200 hover:border-black'}`}
+                        onClick={() => setSelectedSize(variant.size)}
+                        className={`py-4 flex flex-col items-center justify-center transition-all border ${isSelected ? 'bg-black text-white border-black' : isOut ? 'bg-zinc-50 text-zinc-300 border-zinc-200 cursor-not-allowed line-through' : 'bg-white text-black border-zinc-200 hover:border-black shadow-sm'}`}
                       >
-                         US {size}
+                         <span className="text-[13px] font-black">US {variant.size}</span>
+                         {!isOut && <span className={`text-[8px] font-bold mt-1 ${isSelected ? 'text-white/60' : 'text-zinc-400'}`}>{variant.stock} Left</span>}
                       </button>
                    );
                 })}
+                {(!product.variants || product.variants.length === 0) && (
+                   <p className="col-span-full text-[10px] font-bold text-zinc-400 italic">No sizes currently available.</p>
+                )}
              </div>
           </motion.div>
 

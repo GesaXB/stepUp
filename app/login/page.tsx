@@ -83,11 +83,11 @@ export default function LoginPage() {
                   <ShieldCheck size={20} />
                </div>
                <div className="space-y-1">
-                  <p className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-500 italic">Auth Protocol // Success</p>
+                  <p className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-500 italic">Login // Status</p>
                   <p className="text-[14px] font-black uppercase italic tracking-tighter">{successMessage}</p>
                </div>
                <div className="w-12 h-px bg-white/20 ml-4" />
-               <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest italic animate-pulse">Redirecting...</div>
+               <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest italic animate-pulse">Please Wait...</div>
             </div>
           </motion.div>
         )}
@@ -105,11 +105,11 @@ export default function LoginPage() {
         >
           <div className="space-y-4 mb-16">
             <div className="flex items-center gap-4 opacity-40">
-              <span className="text-[10px] font-black uppercase tracking-[0.5em] text-black italic">Security Protocol</span>
+              <span className="text-[10px] font-black uppercase tracking-[0.5em] text-black italic">Member Area</span>
               <div className="w-12 h-px bg-black" />
             </div>
             <h2 className="text-7xl lg:text-[90px] font-black italic uppercase leading-[0.8] tracking-tighter text-black">
-              Access <br /> <span className="text-zinc-200">The Vault.</span>
+              Sign In <br /> <span className="text-zinc-200">StepUP.</span>
             </h2>
           </div>
           
@@ -118,7 +118,7 @@ export default function LoginPage() {
                 <ShieldCheck size={28} />
              </div>
              <p className="text-[11px] font-black uppercase tracking-widest text-zinc-400 italic max-w-[180px] leading-relaxed">
-                Biometric ID required for priority archival access.
+                Sign in to access exclusive collections and latest updates.
              </p>
           </div>
         </motion.div>
@@ -139,11 +139,11 @@ export default function LoginPage() {
         >
           <div className="space-y-4">
              <div className="flex items-center gap-4 opacity-40 mb-2">
-                <span className="text-[10px] font-black uppercase tracking-widest italic">Protocol 02</span>
+                <span className="text-[10px] font-black uppercase tracking-widest italic">User Login</span>
                 <div className="w-8 h-px bg-black" />
              </div>
              <h1 className="text-5xl md:text-6xl font-black italic uppercase leading-[0.85] tracking-tighter">
-               Welcome <br /><span className="text-zinc-200">Back.</span>
+               Hello <br /><span className="text-zinc-200">Again.</span>
              </h1>
           </div>
 
@@ -163,14 +163,14 @@ export default function LoginPage() {
 
             <div className="space-y-6">
               <div className="space-y-2 group">
-                <label className="text-[9px] font-black uppercase tracking-[0.4em] text-zinc-300 group-focus-within:text-black transition-colors italic">Identification (Email)</label>
+                <label className="text-[9px] font-black uppercase tracking-[0.4em] text-zinc-300 group-focus-within:text-black transition-colors italic">Email Address</label>
                 <div className="relative">
                   <input 
                     type="email" 
                     required
                     onChange={(e) => setFormData({ ...formData, email: sanitizeInput(e.target.value) })}
                     value={formData.email}
-                    placeholder="NAME@SYSTEM.COM"
+                    placeholder="name@email.com"
                     className="w-full border-b-[1.5px] border-zinc-100 py-4 outline-none focus:border-black transition-all text-[15px] font-black italic placeholder:text-zinc-100 tracking-widest bg-transparent"
                   />
                 </div>
@@ -178,8 +178,8 @@ export default function LoginPage() {
 
               <div className="space-y-2 group relative">
                 <div className="flex justify-between items-center mb-1">
-                   <label className="text-[9px] font-black uppercase tracking-[0.4em] text-zinc-300 group-focus-within:text-black transition-colors italic">Access Key</label>
-                   <Link href="/forgot-password" className="text-[9px] font-black uppercase tracking-widest text-zinc-300 hover:text-black transition-colors border-b border-transparent hover:border-black">Forgot Key?</Link>
+                   <label className="text-[9px] font-black uppercase tracking-[0.4em] text-zinc-300 group-focus-within:text-black transition-colors italic">Password</label>
+                   <Link href="/forgot-password" className="text-[9px] font-black uppercase tracking-widest text-zinc-300 hover:text-black transition-colors border-b border-transparent hover:border-black">Forgot Password?</Link>
                 </div>
                 <div className="relative">
                   <input 
@@ -208,7 +208,7 @@ export default function LoginPage() {
               >
                 <div className="absolute inset-0 bg-zinc-900 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-[0.16,1,0.3,1]" />
                 <span className="text-[13px] font-black uppercase tracking-[0.4em] italic relative z-10 flex items-center gap-4">
-                  {loading ? <Loader2 className="animate-spin" size={20} /> : "Grant Access"}
+                  {loading ? <Loader2 className="animate-spin" size={20} /> : "Login Now"}
                   <ArrowRight size={18} className={loading ? "hidden" : "group-hover:translate-x-3 transition-transform duration-500 ease-out"} />
                 </span>
               </button>
@@ -234,18 +234,18 @@ export default function LoginPage() {
                       <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
                     </svg>
                   )}
-                  Google Verification
+                  Login with Google
                 </span>
               </button>
             </div>
 
             <div className="flex items-center justify-between pt-6 border-t border-zinc-50">
                <div className="flex flex-col gap-1">
-                 <span className="text-[9px] font-black uppercase tracking-widest text-zinc-300 italic">STEPUP // ENCRYPTED</span>
-                 <span className="text-[8px] font-bold text-zinc-200 uppercase">SSL STATUS: ACTIVE</span>
+                 <span className="text-[9px] font-black uppercase tracking-widest text-zinc-300 italic">STEPUP // SECURE</span>
+                 <span className="text-[8px] font-bold text-zinc-200 uppercase">STATUS: ACTIVE</span>
                </div>
                <Link href="/register" className="text-[12px] font-black uppercase italic border-b-2 border-black pb-1 hover:opacity-50 transition-all tracking-widest">
-                  Initialise Registration
+                  Create Account
                </Link>
             </div>
           </form>

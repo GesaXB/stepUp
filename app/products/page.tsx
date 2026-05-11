@@ -1,6 +1,6 @@
 "use client";
 
-import { SlidersHorizontal } from "lucide-react";
+import { SlidersHorizontal, Loader2, Package } from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import FilterSidebar from "@/components/products/filter-sidebar";
@@ -12,15 +12,33 @@ import { PRODUCTS, PRODUCT_FILTERS } from "@/lib/products";
 export default function ProductsPage() {
   const [activeFilter, setActiveFilter] = useState("All");
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
-  const filteredProducts = activeFilter === "All" 
-    ? PRODUCTS 
-    : PRODUCTS.filter(p => p.type === activeFilter);
+  useEffect(() => {
+    const fetchProducts = async () => {
+      setLoading(true);
+      try {
+        const res = await fetch(`/api/products?type=${activeFilter}`);
+        const data = await res.json();
+        if (data.products) {
+          setProducts(data.products);
+        }
+      } catch (err) {
+        console.error("Failed to fetch products:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProducts();
+  }, [activeFilter]);
 
   if (!mounted) return <div className="min-h-screen bg-white" />;
+
+  const filteredProducts = products;
 
   return (
     <div className="min-h-screen bg-white selection:bg-black selection:text-white flex flex-col">
@@ -60,7 +78,24 @@ export default function ProductsPage() {
               </button>
            </motion.div>
 
-           <ProductGrid filteredProducts={filteredProducts} />
+           {loading ? (
+             <div className="flex-1 flex flex-col items-center justify-center py-24 gap-4">
+                <Loader2 className="animate-spin text-black" size={40} />
+                <p className="text-[10px] font-black uppercase tracking-[0.4em] italic animate-pulse">Fetching Sneakers...</p>
+             </div>
+           ) : filteredProducts.length === 0 ? (
+             <div className="flex-1 flex flex-col items-center justify-center py-32 space-y-6">
+                <div className="w-16 h-16 bg-zinc-50 flex items-center justify-center rounded-full border border-black/5">
+                   <Package size={24} className="text-zinc-300" />
+                </div>
+                <div className="text-center space-y-2">
+                   <p className="text-xl font-black italic uppercase tracking-tighter">No Sneakers Found.</p>
+                   <p className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest italic">Check back later for new arrivals.</p>
+                </div>
+             </div>
+           ) : (
+             <ProductGrid filteredProducts={filteredProducts} />
+           )}
         </div>
       </main>
 

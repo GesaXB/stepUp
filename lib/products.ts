@@ -1,6 +1,8 @@
 export interface Product {
+  id?: string;
   name: string;
   image: string;
+  images?: string[];
   price: string;
   sku: string;
   status: string;
@@ -8,6 +10,11 @@ export interface Product {
   description: string;
   isNewDrop?: boolean;
   isCollab?: boolean;
+  variants?: {
+    id: string;
+    size: string;
+    stock: number;
+  }[];
 }
 
 export const PRODUCTS: Product[] = [

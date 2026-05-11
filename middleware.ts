@@ -19,11 +19,12 @@ export async function middleware(request: NextRequest) {
   
   const isAdminRoute = pathname.startsWith("/admin")
 
-  // 1. If user is logged in and tries to access login/register, redirect to profile
+  // 1. If user is logged in and tries to access login/register, redirect based on role
   if (isAuthRoute && session) {
     try {
-      await jwtVerify(session, SECRET)
-      return NextResponse.redirect(new URL("/profile", request.url))
+      const { payload } = await jwtVerify(session, SECRET)
+      const target = payload.role === "ADMIN" ? "/admin" : "/profile"
+      return NextResponse.redirect(new URL(target, request.url))
     } catch (e) {
       // Session invalid, let them proceed
     }
@@ -36,12 +37,18 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-  // 3. Admin specific protection (check role in JWT)
-  if (isAdminRoute && session) {
+  // 3. Admin specific protection
+  if (session) {
     try {
       const { payload } = await jwtVerify(session, SECRET)
-      if (payload.role !== "ADMIN") {
-        // Redirect non-admins to home
+      
+      // If Admin tries to access regular user profile, redirect to admin dashboard
+      if (pathname.startsWith("/profile") && payload.role === "ADMIN") {
+        return NextResponse.redirect(new URL("/admin", request.url))
+      }
+
+      // Protection for /admin routes
+      if (isAdminRoute && payload.role !== "ADMIN") {
         return NextResponse.redirect(new URL("/", request.url))
       }
     } catch (e) {
