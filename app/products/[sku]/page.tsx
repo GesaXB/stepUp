@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import ProductDetailClient from "@/components/products/product-detail-client";
 import { prisma } from "@/lib/prisma";
 
-export default async function ProductDetailPage({ params }: { params: { sku: string } }) {
+export default async function ProductDetailPage({ params }: { params: Promise<{ sku: string }> }) {
   const resolvedParams = await params;
   
   const product = await prisma.product.findUnique({
