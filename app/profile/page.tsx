@@ -79,7 +79,7 @@ export default function ProfilePage() {
 
   const handleEmailUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newEmail || newEmail === user.email) return;
+    if (!newEmail || newEmail === user.email || !supabase) return;
 
     setUpdating(true);
     setError(null);
@@ -103,7 +103,7 @@ export default function ProfilePage() {
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !user) return;
+    if (!file || !user || !supabase) return;
 
     setUpdating(true);
     try {
@@ -133,7 +133,9 @@ export default function ProfilePage() {
   const handleLogout = async () => {
     try {
       clearLocalCart();
-      await supabase.auth.signOut();
+      if (supabase) {
+        await supabase.auth.signOut();
+      }
       await fetch("/api/auth/logout", { method: "POST" });
       window.location.href = "/";
     } catch (err) {
